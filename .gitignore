@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+backend/.venv/
+worker/.venv/
+worker/dist/
+worker/dist_release/
+worker/build/
+worker/*.spec
+
+# Node / frontend
+node_modules/
+frontend/dist/
+
+# Env files (never commit secrets)
+.env
+.env.local
+*.env.local
+
+# OS / Editor noise
+.DS_Store
+.idea/
+.qoder/
+.vscode/
+*.swp
+*.swo
+
+# Release packaging artifacts
+/dist/

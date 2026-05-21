@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: spiderman
+      POSTGRES_PASSWORD: spiderman
+      POSTGRES_DB: spiderman
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spiderman"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  master:
+    build:
+      context: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://spiderman:spiderman@postgres:5432/spiderman
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+      MASTER_LOCAL_NODE_ID: ${MASTER_LOCAL_NODE_ID:-master-local}
+      MASTER_LOCAL_API_KEY: ${MASTER_LOCAL_API_KEY:-dev-master-local-key}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      DEBUG: "true"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  master_local_worker:
+    build:
+      context: ./worker
+    environment:
+      MASTER_URL: ws://master:8000
+      API_KEY: ${MASTER_LOCAL_API_KEY:-dev-master-local-key}
+      NODE_ID: ${MASTER_LOCAL_NODE_ID:-master-local}
+      NODE_NAME: master-local
+      LISTEN_PORT: 8001
+      HEARTBEAT_INTERVAL: 5
+      WORK_DIR: /data/work
+    volumes:
+      - workerdata:/data/work
+    depends_on:
+      master:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - master
+
+volumes:
+  pgdata:
+  redisdata:
+  workerdata:

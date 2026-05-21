@@ -1,0 +1,91 @@
+# 用阿里云 ACR (或任意镜像仓库) 部署的 compose。
+# 跟 docker-compose.yml 唯一区别：image: 行指向远程仓库而非本地 tag。
+#
+# 使用：
+#   1. 在 .env 里设好 SECRET_KEY / MASTER_LOCAL_API_KEY 等敏感项
+#   2. docker login crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com  # 私有仓库才需要
+#   3. docker compose -f docker-compose.registry.yml pull
+#   4. docker compose -f docker-compose.registry.yml up -d
+#
+# 升级新版本：把 VERSION=x.y 写到 .env，重跑 pull + up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: spiderman
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-spiderman}
+      POSTGRES_DB: spiderman
+    volumes:
+      - ${DATA_ROOT:-/opt/spiderman}/pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spiderman"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - ${DATA_ROOT:-/opt/spiderman}/redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  master:
+    image: ${REGISTRY:-crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com}/${ACR_NAMESPACE:-ckcookies666}/${ACR_REPO:-spider_man_task}:master-${VERSION:-1.0}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://spiderman:${DB_PASSWORD:-spiderman}@postgres:5432/spiderman
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set in .env}
+      MASTER_LOCAL_NODE_ID: ${MASTER_LOCAL_NODE_ID:-master-local}
+      MASTER_LOCAL_API_KEY: ${MASTER_LOCAL_API_KEY:?MASTER_LOCAL_API_KEY must be set}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      WORKERS: ${WORKERS:-2}
+      PROJECT_DATA_ROOT: /var/lib/spiderman/projects
+      PROJECT_ZIP_ROOT: /var/lib/spiderman/zips
+      TASK_LOG_ROOT: /var/lib/spiderman/taskLogs
+      PERSISTENT_ROOT: /var/lib/spiderman/persistentMappedAddress
+    volumes:
+      - ${DATA_ROOT:-/opt/spiderman}/projects:/var/lib/spiderman/projects
+      - ${DATA_ROOT:-/opt/spiderman}/zips:/var/lib/spiderman/zips
+      - ${DATA_ROOT:-/opt/spiderman}/taskLogs:/var/lib/spiderman/taskLogs
+      - ${DATA_ROOT:-/opt/spiderman}/persistent:/var/lib/spiderman/persistentMappedAddress
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  master_local_worker:
+    image: ${REGISTRY:-crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com}/${ACR_NAMESPACE:-ckcookies666}/${ACR_REPO:-spider_man_task}:worker-${VERSION:-1.0}
+    environment:
+      MASTER_URL: ws://master:8000
+      API_KEY: ${MASTER_LOCAL_API_KEY:?MASTER_LOCAL_API_KEY must be set}
+      NODE_ID: ${MASTER_LOCAL_NODE_ID:-master-local}
+      NODE_NAME: master-local
+      LISTEN_PORT: 8001
+      HEARTBEAT_INTERVAL: 5
+      WORK_DIR: /data/work
+    volumes:
+      - ${DATA_ROOT:-/opt/spiderman}/workerdata:/data/work
+    depends_on:
+      master:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    image: ${REGISTRY:-crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com}/${ACR_NAMESPACE:-ckcookies666}/${ACR_REPO:-spider_man_task}:frontend-${VERSION:-1.0}
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - master
+    restart: unless-stopped
