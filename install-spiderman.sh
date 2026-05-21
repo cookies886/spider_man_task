@@ -2,10 +2,10 @@
 # SpiderMan 一键部署脚本
 #
 # 用法：
-#   curl -fsSL https://raw.githubusercontent.com/ckcookies666/spider_man_task/main/install-spiderman.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/cookies886/spider_man_task/main/install-spiderman.sh | bash
 #
 # 或者下载后再跑：
-#   curl -fsSL https://raw.githubusercontent.com/ckcookies666/spider_man_task/main/install-spiderman.sh -o install-spiderman.sh
+#   curl -fsSL https://raw.githubusercontent.com/cookies886/spider_man_task/main/install-spiderman.sh -o install-spiderman.sh
 #   chmod +x install-spiderman.sh
 #   ./install-spiderman.sh
 #
@@ -21,14 +21,14 @@ set -euo pipefail
 
 # ---------- 配置 ----------
 
-GITHUB_REPO="${GITHUB_REPO:-ckcookies666/spider_man_task}"
+GITHUB_REPO="${GITHUB_REPO:-cookies886/spider_man_task}"
 GITHUB_BRANCH="${GITHUB_BRANCH:-main}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/spiderman}"
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 RAW="https://raw.githubusercontent.com/$GITHUB_REPO/$GITHUB_BRANCH"
 ACR_REGISTRY="crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com"
-ACR_NAMESPACE="ckcookies666"
+ACR_NAMESPACE="cookies886"
 ACR_REPO="spider_man_task"
 VERSION="${VERSION:-1.0}"
 YES_ALL="${YES_ALL:-0}"

@@ -14,7 +14,7 @@ plain Python process.
 
 | Secret | 值 |
 |---|---|
-| `ACR_USERNAME` | 你的阿里云 ACR 账号名（如 `ckcookies666`） |
+| `ACR_USERNAME` | 你的阿里云 ACR 账号名（如 `cookies886`） |
 | `ACR_PASSWORD` | ACR 控制台 → 个人实例 → 访问凭证 → 设的固定密码 |
 
 发版示例：
@@ -29,12 +29,12 @@ git push origin v1.0.1
 任意 Linux 服务器（amd64）上：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ckcookies666/spider_man_task/main/install-spiderman.sh | bash
+curl -fsSL https://raw.githubusercontent.com/cookies886/spider_man_task/main/install-spiderman.sh | bash
 ```
 
 脚本会自动：
 - 检测 / 安装 Docker（缺失时使用阿里云源一键安装）
-- 拉取预构建镜像（来自 ACR：`crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com/ckcookies666/spider_man_task`）
+- 拉取预构建镜像（来自 ACR：`crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com/cookies886/spider_man_task`）
 - 生成 `.env` 并随机化敏感密钥
 - 启动全栈 + 跑数据库迁移
 - 等待健康检查通过
@@ -45,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/ckcookies666/spider_man_task/main/i
 无人值守模式（CI/批量部署）：
 
 ```bash
-YES_ALL=1 curl -fsSL https://raw.githubusercontent.com/ckcookies666/spider_man_task/main/install-spiderman.sh | bash
+YES_ALL=1 curl -fsSL https://raw.githubusercontent.com/cookies886/spider_man_task/main/install-spiderman.sh | bash
 ```
 
 ## Features

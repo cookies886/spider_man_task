@@ -8,13 +8,13 @@
 #   bash scripts/push-to-acr.sh                # 用脚本默认配置（你的仓库）
 #   REGISTRY=... NAMESPACE=... REPO=... bash scripts/push-to-acr.sh
 #
-# 默认目标：crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com/ckcookies666/spider_man_task
+# 默认目标：crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com/cookies886/spider_man_task
 # 三个 tag：master-1.0 / frontend-1.0 / worker-1.0
 
 set -euo pipefail
 
 REGISTRY="${REGISTRY:-crpi-nckaq92hgnekr1fo.cn-hangzhou.personal.cr.aliyuncs.com}"
-NAMESPACE="${NAMESPACE:-ckcookies666}"
+NAMESPACE="${NAMESPACE:-cookies886}"
 REPO="${REPO:-spider_man_task}"
 VERSION="${VERSION:-1.0}"
 
